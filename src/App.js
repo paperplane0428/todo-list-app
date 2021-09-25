@@ -1,83 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
-import {useState} from 'react';
+import ToDoApp from "./component/ToDoApp.react.js"
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-const ToDoItem = (props) => {
-  const [isDone, setIsDone] = useState(false)
-  const item = props.item
-  const deleteList = props.deleteList
-  const handleClick = (e) => {
-    if (isDone){
-      setIsDone(false)
-    } else {
-      setIsDone(true)
-    }
-  }
-  const handleBtnClick = (e) => {
-    deleteList(item)
-  }
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCCJ2hT7rTjP_tizehWSNqWqLK4anzZy9M",
+  authDomain: "todo-list-app-27bb6.firebaseapp.com",
+  projectId: "todo-list-app-27bb6",
+  storageBucket: "todo-list-app-27bb6.appspot.com",
+  messagingSenderId: "853535092900",
+  appId: "1:853535092900:web:0dcf4a96e711ee27c4b631",
+  measurementId: "G-81BQ7HSMJK"
+};
 
-  let displayText = item
-  if(isDone){
-    displayText = item + ' finished'
-  }
-
-  return (
-    <div>
-      <li onClick={handleClick}>{displayText}</li>
-      <button onClick={handleBtnClick}>Delete</button>
-    </div>
-  )
-}
-
-const ToDoList = (props) => {
-  const toDoList = props.toDoList
-  const toDoListComponent = toDoList.map(item => {
-    return (
-      <ToDoItem key={item} deleteList={props.deleteList} item={item}/>
-    )
-  })
-  return (
-    <ul>{toDoListComponent}</ul>
-  )
-}
-
-const Input = (props) => {
-  const [name, setName] = useState('')
-  const addList = props.addList
-  const handleChange = (e) => {
-    setName(e.target.value)
-  }
-  const handleClick = (e) => {
-    addList(name)
-    setName('')
-  }
-  return (
-    <div>
-      <input onChange={handleChange} value={name}/>
-      <button onClick={handleClick}>Submit</button>
-    </div>
-  )
-}
-
-const ToDoApp = (props) => {
-  const [toDoList, setToDoList] = useState([])
-  const addList = (newItem) => {
-    setToDoList([...toDoList, newItem])
-  }
-  const deleteList = (del) => {
-    const newList = toDoList.filter(item => {
-      return item !== del
-    })
-    setToDoList(newList)
-  }
-
-  return (
-    <div>
-      <ToDoList toDoList={toDoList} deleteList={deleteList}/>
-      <Input addList={addList}/>
-    </div>
-  )
-}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 export default ToDoApp;
