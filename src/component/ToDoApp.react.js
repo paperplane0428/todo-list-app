@@ -1,8 +1,12 @@
+import * as React from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import {useState} from 'react';
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import Container from '@mui/material/Container';
 
 const ToDoItem = (props) => {
     const [isDone, setIsDone] = useState(false)
@@ -52,11 +56,12 @@ const ToDoItem = (props) => {
       addList(name)
       setName('')
     }
-    return (
+    return (  
       <div>
         <TextField value={name} onChange={handleChange}id="standard-basic" variant="standard" />
         <Button onClick={handleClick} variant="contained">Submit</Button>
       </div>
+      
     )
   }
   
@@ -73,10 +78,17 @@ const ToDoItem = (props) => {
     }
   
     return (
-      <div>
-        <ToDoList toDoList={toDoList} deleteList={deleteList}/>
-        <Input addList={addList}/>
-      </div>
+      <React.Fragment>
+        <CssBaseline />
+        <Container fixed>
+          <Box display="flex">
+            <Box m="auto" sx={{height: '100vh'}}>
+              <ToDoList toDoList={toDoList} deleteList={deleteList}/>
+              <Input addList={addList}/>
+            </Box>
+          </Box>
+        </Container>
+      </React.Fragment>
     )
   }
   
