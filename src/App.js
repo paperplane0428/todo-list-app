@@ -2,6 +2,7 @@ import ToDoApp from "./component/ToDoApp.react.js"
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { addDoc, collection, getFirestore, query, where, getDocs } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -20,5 +21,30 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+const db = getFirestore(app);
+/* const foo = async () => {
+  try {
+  
+    addDoc(collection(db, "users"), {
+    first: "Jo",
+    middle: "Mathison",
+    last: "Turing",
+    born: 1912
+    });
+    const q = query(collection(db, "users"), where("middle", "==", "Mathison"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      console.log(doc.id, " => ", doc.data());
+    });
+  
+    console.log("Document written with ID: ");
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+
+foo();
+*/
 
 export default ToDoApp;
