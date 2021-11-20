@@ -3,13 +3,13 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { addDoc, collection, getFirestore } from "firebase/firestore";
+import { addDoc, collection, getFirestore, deleteDoc, doc, query, where, getDocs} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCCJ2hT7rTjP_tizehWSNqWqLK4anzZy9M",
@@ -71,7 +71,7 @@ const Input = (props) => {
   };
   return (  
     <div>
-      <TextField value={name} onChange={handleChange}id="standard-basic" variant="standard" />
+      <TextField value={name} onChange={handleChange} id="standard-basic" variant="standard" />
       <Button onClick={handleClick} variant="contained">Submit</Button>
     </div>
   );
@@ -79,17 +79,36 @@ const Input = (props) => {
   
 const ToDoApp = (props) => {
   const [toDoList, setToDoList] = useState([]);
+
+  useEffect(async () => {
+    const q = query(collection(db, "ToDoList"));
+    const querySnapshot = await getDocs(q);
+    const a = []
+    querySnapshot.forEach((document) => { 
+      a.push(document.data().toDoItem)
+    })
+    
+    setToDoList(a);
+
+  }, []);
+
   const addList = (newItem) => {
     setToDoList([...toDoList, newItem]);
     addDoc(collection(db, "ToDoList"), {
       toDoItem: newItem
     });
   };
-  const deleteList = (del) => {
+  const deleteList = async (del) => {
     const newList = toDoList.filter(item => {
       return item !== del;
     });
     setToDoList(newList);
+    const q = query(collection(db, "ToDoList"), where("toDoItem", "==", del));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((document) => {
+      deleteDoc(doc(db, "ToDoList", document.id));
+    });
+    
   };
 
   return (
