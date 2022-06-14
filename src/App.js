@@ -19,32 +19,222 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+/*const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const db = getFirestore(app);
-/* const foo = async () => {
-  try {
-  
-    addDoc(collection(db, "users"), {
-    first: "Jo",
-    middle: "Mathison",
-    last: "Turing",
-    born: 1912
-    });
-    const q = query(collection(db, "users"), where("middle", "==", "Mathison"));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, " => ", doc.data());
-    });
-  
-    console.log("Document written with ID: ");
-  } catch (e) {
-    console.error("Error adding document: ", e);
-  }
+const db = getFirestore(app); */
+
+/*
+
+const ToDoItem = (props) => {
+  const item = props.item
+  const deleteList = props.deleteList
+  const updateList = props.updateList
+
+  const handleClick = (e) => {
+    updateList(item)
+  };
+
+  const handleBtnClick = (e) => {
+    deleteList(item);
+  };
+
+  return(
+    <div>
+      <FormControlLabel control={<Checkbox onClick={handleClick} checked={item.isDone}/>} label={item.toDoItem}/>
+      <p>{item.timeStamp}</p>
+      <p>{item.currentUser}</p>
+      <Button onClick={handleBtnClick}>Delete</Button>
+    </div>
+  );
 };
 
-foo();
+const ToDoList = (props) => {
+  const toDoList = props.toDoList;
+  const toDoListComponent = toDoList.map(item => {
+    return <ToDoItem key={item.id} deleteList={props.deleteList} updateList={props.updateList} item={item} />
+  });
+
+  return(
+    <ol>
+      {toDoListComponent}
+    </ol>
+  );
+};
+
+const Input = (props) => {
+  const [name, setName] = useState("");
+  const addList = props.addList;
+
+  const handleChange = (e) => {
+    setName(e.target.value);
+  };
+
+  const handleBtnClick = (e) => {
+    addList(name);
+    setName("");
+  };
+
+  return(
+    <div>
+      <TextField onChange={handleChange} value={name}/>
+      <Button onClick={handleBtnClick}>Submit</Button>
+    </div>
+  )
+};
+
+const ToDoApp = () => {
+  const [toDoList, setToDoList] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isToggleOn, setIsToggleOn] = useState(false);
+
+  useEffect(async() => {
+    const arr = [];
+    const q = query(collection(db ,"ToDoList"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(document => {
+      arr.push({
+        toDoItem: document.data().toDoItem,
+        isDone: document.data().isDone,
+        id: document.id,
+        timeStamp: document.data().timeStamp,
+        currentUser: document.data().currentUser
+      });
+    });
+
+    arr.sort((a, b) => {return a.timeStamp - b.timeStamp});
+    setToDoList(arr);
+
+  }, []);
+
+  const addList = async(newItem) => {
+    const timeStamp = Date.now();
+
+    const item = await addDoc(collection(db, "ToDoList"), {
+      toDoItem: newItem,
+      isDone: false,
+      timeStamp: timeStamp,
+      currentUser: currentUser
+    });
+
+    setToDoList([...toDoList, {
+      toDoItem: newItem,
+      isDone: false,
+      timeStamp: timeStamp,
+      id: item.id,
+      currentUser: currentUser
+    }]);
+  };
+
+  const updateList = (item) => {
+    const newList = toDoList.map(changedItem => {
+      if(changedItem.id === item.id){
+        return {
+          toDoItem: changedItem.toDoItem,
+          isDone: !changedItem.isDone,
+          timeStamp: changedItem.timeStamp,
+          id: changedItem.id,
+          currentUser: changedItem.currentUser
+        };
+      };
+      return changedItem
+    });
+    setToDoList(newList);
+
+    let isDone = item.isDone;
+
+    if(isDone){
+      setDoc(doc(db, "ToDoList", item.id), {
+        isDone: false
+      }, {merge:true});
+    }else{
+      setDoc(doc(db, "ToDoList", item.id), {
+        isDone: true
+      }, {merge:true});
+    }
+  };
+
+  const deleteList = async(del) => {
+    const newList = toDoList.filter(item => {
+      return item.id !== del.id;
+    });
+    setToDoList(newList);
+
+    deleteDoc(doc(db, "ToDoList", del.id))
+  };
+
+   const handleClick = (e) => {
+    signOut(auth).then(() => {
+
+    }).catch((error) => {
+    
+    });
+  };
+  
+  const handleBtnClick = (e) => {
+    setIsToggleOn(!isToggleOn);
+  };
+
+  let logInUi = (
+    <div>
+      <div id="firebaseui-auth-container"></div>
+      <div id="loader">Loading...</div>
+    </div>
+  );
+
+  if(auth.currentUser){
+    logInUi = (
+      <div>
+        <p>{currentUser}</p>
+        <Button onClick={handleClick}>Logout</Button>
+      </div>
+    );
+  };
+  
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setCurrentUser(auth.currentUser.uid)
+      const uid = user.uid;
+      
+    } else {
+      setCurrentUser(null);
+      ui.start('#firebaseui-auth-container', uiConfig); 
+    }
+  });
+
+  let toggle = "";
+  if(isToggleOn){
+    toggle = "Show All Items"
+  }else{
+    toggle = "Show Only My Items"
+  }
+
+  let newList = toDoList;
+  if(isToggleOn){
+    newList = toDoList.filter(document => {
+      return document.currentUser === currentUser
+    });
+  }else{
+    newList = toDoList;
+  }
+  
+  return(
+    <div>
+      <h1>Welcome to My Awesome App</h1>
+      {logInUi}
+      <Button onClick={handleBtnClick}>{toggle}</Button>
+      <ToDoList toDoList={newList} updateList={updateList} deleteList={deleteList}/>
+      <Input addList={addList}/>
+      
+    </div>
+  )
+
+};
+
+export default ToDoApp;
+
 */
+
+
+
 
 export default ToDoApp;
